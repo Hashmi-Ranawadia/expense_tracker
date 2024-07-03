@@ -3,7 +3,6 @@ import 'package:expense_tracker/presentation/pages/onboarding_page.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatefulWidget {
@@ -30,7 +29,8 @@ class _SplashPageState extends State<SplashPage> {
     Future.delayed(
       Duration(seconds: 2),
       () {
-        Get.offAll(() => showHome ? HomePage() : OnBoardingPage());
+        // Get.offAll(() => showHome ? HomePage() : OnBoardingPage());
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => showHome ? HomePage() : OnBoardingPage(),), (route) => false);
       },
     );
   }

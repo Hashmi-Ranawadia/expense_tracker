@@ -1,14 +1,14 @@
 import 'dart:math';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:expense_tracker/bloc/app_cubit.dart';
+import 'package:expense_tracker/bloc/app_state.dart';
 import 'package:expense_tracker/data/model/expense_model.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
-import 'package:expense_tracker/presentation/controllers/expense_controller.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class AddExpensePage extends StatefulWidget {
@@ -20,23 +20,23 @@ class AddExpensePage extends StatefulWidget {
 }
 
 class _AddExpensePageState extends State<AddExpensePage> {
-  final ExpenseController controller = Get.find();
 
   @override
   void initState() {
     // selectedDate = DateTime.now();
-    controller.amountController.clear();
-    controller.dateController.clear();
-    controller.descriptionController.clear();
-    controller.selectedCategory = '';
+    final appState = BlocProvider.of<AppCubit>(context);
+    appState.amountController.clear();
+    appState.dateController.clear();
+    appState.descriptionController.clear();
+    appState.selectedCategory = '';
 
     if (widget.expense != null) {
-      controller.expenseId = widget.expense!.id;
-      controller.selectedCategory = widget.expense!.category;
-      controller.amountController.text =
+      appState.expenseId = widget.expense!.id;
+      appState.selectedCategory = widget.expense!.category;
+      appState.amountController.text =
           widget.expense!.amount.toStringAsFixed(2) ?? "";
-      controller.dateController.text = widget.expense!.date.toString() ?? "";
-      controller.descriptionController.text =
+      appState.dateController.text = widget.expense!.date.toString() ?? "";
+      appState.descriptionController.text =
           widget.expense!.description.toString() ?? "";
     }
     super.initState();
@@ -44,6 +44,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = BlocProvider.of<AppCubit>(context);
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       // appBar: AppBar(
@@ -73,7 +74,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 children: [
                   InkWell(
                     onTap: () {
-                      Get.back();
+                      // Get.back();
+                      Navigator.pop(context);
                     },
                     child: Icon(
                       Icons.arrow_back_ios,
@@ -127,8 +129,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      GetBuilder<ExpenseController>(
-                        builder: (controller) {
+                      BlocBuilder<AppCubit, AppState>(
+                        builder: (context, state) {
                           return Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -143,7 +145,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                       fontSize: 14),
                                 ),
                                 isExpanded: true,
-                                items: controller.categoryType
+                                items: appState.categoryType
                                     .map((String item) =>
                                         DropdownMenuItem<String>(
                                           value: item,
@@ -155,11 +157,11 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                           ),
                                         ))
                                     .toList(),
-                                value: controller.selectedCategory.isEmpty
+                                value: appState.selectedCategory.isEmpty
                                     ? null
-                                    : controller.selectedCategory,
+                                    : appState.selectedCategory,
                                 onChanged: (value) {
-                                  controller.onSelect(value!);
+                                  appState.onSelect(value!);
                                 },
                               ),
                             ),
@@ -178,7 +180,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         height: 10,
                       ),
                       TextField(
-                        controller: controller.amountController,
+                        controller: appState.amountController,
                         cursorColor: AppColor.primaryColor,
                         decoration: InputDecoration(
                           hintText: "Enter Amount",
@@ -210,14 +212,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      GetBuilder<ExpenseController>(
-                        builder: (controller) {
+                      BlocBuilder<AppCubit, AppState>(
+                        builder: (context, state) {
                           return TextField(
                             onTap: () async {
-                              controller.pickDate(context);
+                              appState.pickDate(context);
                             },
                             readOnly: true,
-                            controller: controller.dateController,
+                            controller: appState.dateController,
                             cursorColor: AppColor.primaryColor,
                             decoration: InputDecoration(
                               suffixIcon: Icon(
@@ -256,7 +258,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         height: 10,
                       ),
                       TextField(
-                        controller: controller.descriptionController,
+                        controller: appState.descriptionController,
                         cursorColor: AppColor.primaryColor,
                         maxLines: 3,
                         decoration: InputDecoration(
@@ -293,30 +295,32 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           onPressed: () {
                             if (widget.expense != null) {
                               final expense = ExpenseModel(
-                                id: controller.expenseId,
-                                category: controller.selectedCategory,
+                                id: appState.expenseId,
+                                category: appState.selectedCategory,
                                 amount: double.parse(
-                                    controller.amountController.text),
-                                date: controller.dateController.text,
+                                    appState.amountController.text),
+                                date: appState.dateController.text,
                                 description:
-                                    controller.descriptionController.text,
+                                    appState.descriptionController.text,
                               );
-                              controller.updateExistingExpense(expense);
+                              appState.updateExistingExpense(expense);
                             } else {
                               final random = Random();
-                              controller.expenseId = random.nextInt(10000);
+                              appState.expenseId = random.nextInt(10000);
                               final expense = ExpenseModel(
-                                id: controller.expenseId,
-                                category: controller.selectedCategory,
+                                id: appState.expenseId,
+                                category: appState.selectedCategory,
                                 amount: double.parse(
-                                    controller.amountController.text),
-                                date: controller.dateController.text,
+                                    appState.amountController.text),
+                                date: appState.dateController.text,
                                 description:
-                                    controller.descriptionController.text,
+                                    appState.descriptionController.text,
                               );
-                              controller.addNewExpense(expense);
+                              appState.addNewExpense(expense);
                             }
-                            Get.back();
+                            // Get.back();
+                            appState.dateController.clear();
+                            Navigator.pop(context);
                           },
                           child: Center(
                               child: Text(

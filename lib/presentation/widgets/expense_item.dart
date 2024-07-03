@@ -1,14 +1,11 @@
 import 'package:expense_tracker/data/model/expense_model.dart';
-import 'package:expense_tracker/domain/usecases/add_expense.dart';
 import 'package:expense_tracker/presentation/pages/add_expense_page.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:expense_tracker/presentation/controllers/expense_controller.dart';
 
 class ExpenseItem extends StatelessWidget {
   final ExpenseModel expense;
-  final ExpenseController controller = Get.find();
+  // final ExpenseController controller = Get.find();
 
   ExpenseItem({required this.expense});
 

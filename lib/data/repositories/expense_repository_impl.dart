@@ -1,11 +1,10 @@
 import 'package:expense_tracker/data/local/sqflite_database.dart';
 import 'package:expense_tracker/data/model/expense_model.dart';
-import 'package:expense_tracker/domain/repositories/expense_repository.dart';
 
-class ExpenseRepositoryImpl implements ExpenseRepository {
-  final SqfliteDatabase database;
+class ExpenseRepositoryImpl {
+  final SqfliteDatabase database = SqfliteDatabase();
 
-  ExpenseRepositoryImpl(this.database);
+  // ExpenseRepositoryImpl(this.database);
 
   @override
   Future<void> addExpense(ExpenseModel expense) async {
@@ -29,6 +28,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   @override
   Future<void> updateExpense(ExpenseModel expense) async {
     final db = await database.database;
-    await db.update('expenses', expense.toMap(), where: 'id = ?', whereArgs: [expense.id]);
+    await db.update('expenses', expense.toMap(),
+        where: 'id = ?', whereArgs: [expense.id]);
   }
 }

@@ -2,7 +2,6 @@ import 'package:expense_tracker/presentation/pages/home_page.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnBoardingPage extends StatelessWidget {
@@ -80,7 +79,13 @@ class OnBoardingPage extends StatelessWidget {
                   prefs = await SharedPreferences.getInstance();
                 }
                 prefs!.setBool('showHome', true);
-                Get.offAll(() => HomePage());
+                // Get.offAll(() => HomePage());
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomePage(),
+                    ),
+                    (route) => false);
               },
               child: Center(
                   child: Text(

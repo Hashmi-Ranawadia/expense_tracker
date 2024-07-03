@@ -1,30 +1,19 @@
+import 'package:bloc/bloc.dart';
+import 'package:expense_tracker/bloc/app_state.dart';
 import 'package:expense_tracker/data/model/expense_model.dart';
+import 'package:expense_tracker/data/repositories/expense_repository_impl.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:expense_tracker/domain/usecases/add_expense.dart';
-import 'package:expense_tracker/domain/usecases/delete_expense.dart';
-import 'package:expense_tracker/domain/usecases/get_expenses.dart';
-import 'package:expense_tracker/domain/usecases/update_expense.dart';
 import 'package:intl/intl.dart';
 
-class ExpenseController extends GetxController {
-  final AddExpense addExpense;
-  final DeleteExpense deleteExpense;
-  final GetExpenses getExpenses;
-  final UpdateExpense updateExpense;
+class AppCubit extends Cubit<AppState> {
+  AppCubit() : super(initialState());
 
-  ExpenseController({
-    required this.addExpense,
-    required this.deleteExpense,
-    required this.getExpenses,
-    required this.updateExpense,
-  });
-
-  var expenses = <ExpenseModel>[].obs;
+  
+  List<ExpenseModel> expenses = [];
   var selectedDate;
   int expenseId = 0;
-  var totalExpenses = 0.0.obs;
+  var totalExpenses = 0.0;
   final TextEditingController dateController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -35,43 +24,40 @@ class ExpenseController extends GetxController {
 
   var selectedIndex = 0;
   var filteredList = [];
-  var filteredListByDate = <ExpenseModel>[].obs;
+  List<ExpenseModel> filteredListByDate = [];
 
-  @override
-  void onInit() {
-    super.onInit();
-    selectedDate = DateTime.now();
-    fetchExpenses();
-  }
-
+  ExpenseRepositoryImpl respository = ExpenseRepositoryImpl();
+  
   void fetchExpenses() async {
-    expenses.value.clear();
+    expenses.clear();
     filteredList.clear();
 
-    expenses.value = await getExpenses();
-    totalExpenses.value = 0;
+    expenses = await respository.getExpenses();
+    totalExpenses = 0;
     for (int i = 0; i < expenses.length; i++) {
-      totalExpenses.value += expenses[i].amount;
+      totalExpenses += expenses[i].amount;
     }
     filteredList.addAll(expenses);
+    emit(successState());
   }
 
   void addNewExpense(ExpenseModel expense) async {
-    await addExpense(expense);
+    await respository.addExpense(expense);
     fetchExpenses();
   }
 
   void updateExistingExpense(ExpenseModel expense) async {
-    await updateExpense(expense);
+    await respository.updateExpense(expense);
     fetchExpenses();
   }
 
   void removeExpense(int id) async {
-    await deleteExpense(id);
+    await respository.deleteExpense(id);
     fetchExpenses();
   }
 
   void pickDate(BuildContext context) async {
+    selectedDate = DateTime.now();
     final DateTime? picked = await showDatePicker(
         builder: (context, child) {
           return Theme(
@@ -92,13 +78,13 @@ class ExpenseController extends GetxController {
     if (picked != null) {
       selectedDate = DateFormat("yyyy-MM-dd").format(picked);
       dateController.text = selectedDate;
-      update();
+      emit(successState());
     }
   }
 
   void onSelect(String value) {
     selectedCategory = value;
-    update();
+    emit(successState());
   }
 
   void itemSelectedIndex(int index) {
@@ -111,22 +97,22 @@ class ExpenseController extends GetxController {
       filteredList.addAll(
           expenses.where((element) => element.category == categoryType[index]));
     }
-    update();
+    emit(successState());
   }
 
   void filterListByDate() async {
-    expenses.value.clear();
+    expenses.clear();
 
     // expenses.value = await getExpenses();
-    filteredListByDate.value = await getExpenses();
-    totalExpenses.value = 0;
+    filteredListByDate = await respository.getExpenses();
+    totalExpenses = 0;
 
     expenses.addAll(filteredListByDate
         .where((element) => element.date == dateController.text));
 
     for (int i = 0; i < expenses.length; i++) {
-      totalExpenses.value += expenses[i].amount;
+      totalExpenses += expenses[i].amount;
     }
-    update();
+    emit(successState());
   }
 }

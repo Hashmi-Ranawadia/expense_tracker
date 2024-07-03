@@ -1,16 +1,18 @@
+import 'package:expense_tracker/bloc/app_cubit.dart';
+import 'package:expense_tracker/bloc/app_state.dart';
 import 'package:expense_tracker/presentation/pages/expenses_page.dart';
 import 'package:expense_tracker/presentation/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
-import 'package:expense_tracker/presentation/controllers/expense_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatelessWidget {
-  final ExpenseController controller = Get.find();
+  // final ExpenseController controller = Get.find();
 
   @override
   Widget build(BuildContext context) {
+    final appState = BlocProvider.of<AppCubit>(context);
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Expense Tracker'),
@@ -36,7 +38,8 @@ class HomePage extends StatelessWidget {
                     children: [
                       InkWell(
                         onTap: () {
-                          Get.back();
+                          // Get.back();
+                          Navigator.pop(context);
                         },
                         child: Container(
                           width: 25,
@@ -89,9 +92,14 @@ class HomePage extends StatelessWidget {
                                                   color: AppColor.blackColor,
                                                   fontSize: 18),
                                             ),
-                                            Icon(
-                                              Icons.close,
-                                              color: AppColor.hintTextColor,
+                                            InkWell(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Icon(
+                                                Icons.close,
+                                                color: AppColor.hintTextColor,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -103,8 +111,8 @@ class HomePage extends StatelessWidget {
                                       const SizedBox(
                                         height: 10,
                                       ),
-                                      GetBuilder<ExpenseController>(
-                                        builder: (controller) {
+                                      BlocBuilder<AppCubit, AppState>(
+                                        builder: (context, state) {
                                           return Padding(
                                             padding: const EdgeInsets.only(
                                               left: 20,
@@ -112,11 +120,11 @@ class HomePage extends StatelessWidget {
                                             ),
                                             child: TextField(
                                               onTap: () async {
-                                                controller.pickDate(context);
+                                                appState.pickDate(context);
                                               },
                                               readOnly: true,
                                               controller:
-                                                  controller.dateController,
+                                                  appState.dateController,
                                               cursorColor:
                                                   AppColor.primaryColor,
                                               decoration: InputDecoration(
@@ -171,9 +179,11 @@ class HomePage extends StatelessWidget {
                                             Expanded(
                                               child: InkWell(
                                                 onTap: () {
-                                                  Get.back();
-                                                  controller.dateController.clear();
-                                                  controller.fetchExpenses();
+                                                  // Get.back();
+                                                  Navigator.pop(context);
+                                                  appState.dateController
+                                                      .clear();
+                                                  appState.fetchExpenses();
                                                 },
                                                 child: Container(
                                                   padding: EdgeInsets.only(
@@ -202,8 +212,9 @@ class HomePage extends StatelessWidget {
                                             Expanded(
                                               child: InkWell(
                                                 onTap: () {
-                                                  controller.filterListByDate();
-                                                  Get.back();
+                                                  appState.filterListByDate();
+                                                  // Get.back();
+                                                  Navigator.pop(context);
                                                 },
                                                 child: Container(
                                                   padding: EdgeInsets.only(
@@ -296,15 +307,17 @@ class HomePage extends StatelessWidget {
                           color: AppColor.whiteColor,
                           size: 20,
                         ),
-                        Obx(() {
-                          return Text(
-                            "${controller.totalExpenses.value.toStringAsFixed(2)}",
-                            style: TextStyle(
-                                color: AppColor.whiteColor,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600),
-                          );
-                        })
+                        BlocBuilder<AppCubit, AppState>(
+                          builder: (context, state) {
+                            return Text(
+                              "${appState.totalExpenses.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                  color: AppColor.whiteColor,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],
